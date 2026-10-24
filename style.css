@@ -1,0 +1,861 @@
+/* =====================================================================
+   BARLANG – élő koncertplakát / fanzine
+   ===================================================================== */
+
+:root {
+  /* paletta – a saját plakátjaikból és logójukból */
+  --mustar: #e6c33f;       /* plakátháttér */
+  --mustar-sotet: #c9a52a;
+  --rozsa: #e55fa6;        /* logó */
+  --rozsa-sotet: #c2397f;
+  --kek: #1c3fb8;          /* betűk, dobverők */
+  --fekete: #141114;
+  --papir: #f1eadb;        /* piszkosfehér papír */
+  --papir-sotet: #e3d9c3;
+  --szurke: #6b645a;
+
+  /* betűk */
+  --f-display: "Rubik Dirt", "Impact", system-ui, sans-serif;
+  --f-poszter: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --f-kez: "Caveat Brush", "Comic Sans MS", cursive;
+  --f-szoveg: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* textúrák (kis inline SVG-k / gradiensek) */
+  --szemcse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --raszter: radial-gradient(circle at center, rgba(20,17,20,.85) 0 1.1px, transparent 1.6px);
+  --raszter-meret: 5px 5px;
+  --szalag: rgba(240, 232, 205, .72);
+
+  --gutter: 16px;
+  --max: 1240px;
+}
+
+/* ---------- alap ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--papir);
+  color: var(--fekete);
+  font-family: var(--f-szoveg);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+/* papírszemcse az egész oldalon */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background-image: var(--szemcse);
+  opacity: .35;
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: multiply;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--kek); outline-offset: 3px; }
+
+.sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+.skip {
+  position: absolute; left: 8px; top: -60px; z-index: 300;
+  background: var(--fekete); color: var(--papir); padding: .5em 1em;
+}
+.skip:focus { top: 8px; }
+
+/* helyőrző – jól látható, hogy ide még adat kell */
+.ph {
+  display: inline-block;
+  font-family: ui-monospace, "Consolas", monospace;
+  font-size: .85em;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fekete);
+  background: repeating-linear-gradient(-45deg, #fff6a8 0 8px, #ffe96b 8px 16px);
+  border: 2px dashed var(--fekete);
+  padding: .15em .45em;
+}
+
+/* kézírás */
+.kez { font-family: var(--f-kez); font-size: 1.5rem; line-height: 1.2; margin: 0; }
+.kez--nagy { font-size: clamp(2.2rem, 8vw, 3.4rem); }
+
+/* szakaszcímek nyomdai elcsúszással (két színréteg eltolva) */
+.cimsor {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(2.8rem, 12vw, 6.5rem);
+  line-height: .9;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+}
+.misreg {
+  color: var(--fekete);
+  text-shadow: -3px 2px 0 var(--rozsa), 3px -2px 0 var(--kek);
+}
+.szakasz-fej {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: .4rem 1.2rem;
+  margin-bottom: 1.6rem;
+}
+
+section {
+  position: relative;
+  padding: 4rem var(--gutter);
+}
+section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
+
+/* ---------- ragasztószalag (újrahasznosítható) ---------- */
+.plakat::before, .plakat-keret::before, .polaroid::before, .zine__lap::before, .terkep::before, .cetli::before, .etlap::before {
+  content: "";
+  position: absolute;
+  top: -12px; left: 50%;
+  width: 92px; height: 26px;
+  background: var(--szalag);
+  transform: translateX(-50%) rotate(-4deg);
+  box-shadow: 0 1px 0 rgba(0,0,0,.08);
+  z-index: 3;
+  /* tépett szélek */
+  clip-path: polygon(0 8%, 4% 0, 96% 6%, 100% 0, 98% 50%, 100% 100%, 94% 92%, 6% 100%, 0 94%, 3% 50%);
+}
+
+/* ---------- MENÜ CETLI ---------- */
+.cetli {
+  position: fixed;
+  top: 10px; right: 10px;
+  z-index: 200;
+  background: var(--mustar);
+  padding: .4rem .6rem .5rem;
+  transform: rotate(2deg);
+  box-shadow: 2px 3px 0 var(--fekete);
+  border: 2px solid var(--fekete);
+  max-width: calc(100vw - 20px);
+}
+.cetli::before { width: 54px; height: 18px; top: -10px; }
+.cetli__btn {
+  font-family: var(--f-poszter);
+  font-size: 1.15rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: none; border: 0; color: var(--fekete);
+  padding: .2rem .3rem;
+  cursor: pointer;
+  min-height: 40px;
+}
+.cetli__lista {
+  list-style: none; margin: 0; padding: 0;
+  display: none;
+}
+.cetli.nyitva .cetli__lista { display: block; }
+.cetli__lista a {
+  display: block;
+  font-family: var(--f-kez);
+  font-size: 1.35rem;
+  text-decoration: none;
+  padding: .3rem .3rem;
+  min-height: 40px;
+}
+.cetli__lista a:hover, .cetli__lista a:focus-visible { background: var(--rozsa); }
+
+@media (min-width: 900px) {
+  .cetli { top: 14px; right: 14px; }
+  .cetli__btn { display: none; }
+  .cetli__lista { display: block; }
+  .cetli__lista a { font-size: 1.25rem; padding: .05rem .3rem; min-height: 0; }
+}
+
+/* ---------- 1. PLAKÁTFAL ---------- */
+.fal {
+  position: relative;
+  min-height: 100svh;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: 5rem var(--gutter) 3rem;
+  overflow: hidden;
+  background:
+    var(--raszter) 0 0 / 7px 7px,
+    linear-gradient(160deg, #2a2328, var(--fekete));
+  background-blend-mode: soft-light, normal;
+}
+@supports (min-height: 100svh) { .fal { min-height: 100svh; } }
+
+.fal__plakatok { position: absolute; inset: 0; }
+.plakat {
+  --r: 0deg;
+  position: absolute;
+  margin: 0;
+  background: var(--papir);
+  padding: 6px;
+  transform: rotate(var(--r));
+  box-shadow: 3px 5px 0 rgba(0,0,0,.45);
+  animation: lebeg 7s ease-in-out infinite;
+}
+.plakat img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.1) contrast(1.05); }
+.p1 { --r: -7deg; left: -4%;  top: 9%;    width: 46%; aspect-ratio: 1; animation-delay: -1s; }
+.p2 { --r: 6deg;  right: -6%; top: 6%;    width: 40%; aspect-ratio: 2/3; animation-delay: -3s; }
+.p3 { --r: 3deg;  left: -8%;  bottom: 5%; width: 62%; aspect-ratio: 3/2; animation-delay: -2s; }
+.p4 { --r: -5deg; right: 2%;  bottom: 12%;width: 36%; aspect-ratio: 1; animation-delay: -4s; }
+.p5 { --r: 10deg; left: 36%;  top: 2%;    width: 26%; aspect-ratio: 1; animation-delay: -5s; }
+
+@media (min-width: 700px) {
+  .p1 { left: 3%;  top: 10%;   width: 24%; }
+  .p2 { right: 3%; top: 6%;    width: 21%; }
+  .p3 { left: 5%;  bottom: 5%; width: 32%; }
+  .p4 { right: 20%;bottom: 4%; width: 17%; }
+  .p5 { left: 36%; top: 3%;    width: 13%; }
+}
+
+@keyframes lebeg {
+  0%, 100% { transform: rotate(var(--r)) translateY(0); }
+  50%      { transform: rotate(calc(var(--r) + .8deg)) translateY(-7px); }
+}
+
+/* papírfecnik eseménynevekkel (JS-ből) */
+.fecni {
+  position: absolute;
+  font-family: var(--f-poszter);
+  text-transform: uppercase;
+  line-height: 1;
+  padding: .35em .55em;
+  border: 2px solid var(--fekete);
+  box-shadow: 2px 3px 0 rgba(0,0,0,.5);
+  white-space: nowrap;
+  font-size: clamp(.85rem, 2.4vw, 1.35rem);
+}
+.fecni b { display: block; font-size: 1.6em; }
+.fecni--1 { background: var(--mustar); color: var(--kek);  left: 2%;  top: 2.5%; transform: rotate(-5deg); }
+.fecni--2 { background: var(--rozsa); color: var(--fekete); left: 4%; bottom: 3%; transform: rotate(4deg); }
+.fecni--3 { background: var(--papir); color: var(--fekete); right: 2%; bottom: 3%; transform: rotate(-3deg); }
+@media (min-width: 700px) {
+  .fecni--2 { left: 26%; }
+}
+@media (max-width: 699px) {
+  .fecni--3 { display: none; }
+}
+
+.fal__cim {
+  position: relative;
+  z-index: 5;
+  max-width: min(980px, 100%);
+}
+.fal__lap {
+  position: relative;
+  text-align: center;
+  background: var(--rozsa);
+  padding: 1.2rem 1.1rem 1.6rem;
+  transform: rotate(-1.5deg);
+  /* tépett alsó szél */
+  clip-path: polygon(0 0, 100% 0, 100% 93%, 96% 100%, 90% 95%, 82% 100%, 74% 96%, 66% 100%, 58% 95%, 50% 100%, 41% 96%, 33% 100%, 25% 95%, 16% 100%, 8% 96%, 0 100%);
+}
+.fal__lap::after { /* raszter a rózsaszín papíron */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,.22) 0 1px, transparent 1.5px) 0 0/6px 6px;
+  pointer-events: none;
+  z-index: 0;
+}
+.logo-felirat {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 15.5vw, 11rem);
+  line-height: .85;
+  margin: 0;
+  letter-spacing: -.02em;
+  color: var(--fekete);
+  text-shadow: 5px 3px 0 var(--kek);
+  position: relative; z-index: 1;
+}
+.fal__alcim { position: relative; z-index: 1; }
+.fal__alcim {
+  font-family: var(--f-szoveg);
+  font-weight: 800;
+  font-size: clamp(.95rem, 2.6vw, 1.3rem);
+  line-height: 1.3;
+  margin: .7rem auto 0;
+  max-width: 34ch;
+}
+
+/* matrica (ferde címke) */
+.matrica {
+  position: absolute;
+  z-index: 6;
+  display: inline-flex; flex-direction: column; align-items: flex-start;
+  text-decoration: none;
+  background: var(--mustar);
+  color: var(--kek);
+  border: 3px solid var(--fekete);
+  border-radius: 10px;
+  padding: .45rem .8rem .5rem;
+  box-shadow: 3px 4px 0 var(--fekete);
+  transition: transform .2s;
+}
+.matrica--kov {
+  right: -8px; bottom: -66px;
+  transform: rotate(6deg);
+  max-width: min(320px, 82vw);
+  text-align: left;
+}
+.matrica--kov:hover, .matrica--kov:focus-visible { transform: rotate(-2deg) scale(1.04); }
+.matrica__kicsi { font-family: var(--f-poszter); font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; color: var(--fekete); }
+.matrica__nagy { font-family: var(--f-poszter); font-size: 1.35rem; line-height: 1.05; text-transform: uppercase; }
+/* a tépett szél árnyéka (clip-path mellett a box-shadow nem látszik) */
+.fal__cim { filter: drop-shadow(6px 8px 0 var(--fekete)); }
+.fal__cim .matrica { box-shadow: none; }
+
+@media (max-width: 699px) {
+  .matrica--kov { position: relative; right: auto; bottom: auto; margin: 1rem auto 0; transform: rotate(-3deg); display: flex; width: fit-content; }
+}
+
+/* ---------- 4. HETI MENETREND ---------- */
+.heti {
+  background: var(--mustar);
+  border-top: 4px solid var(--fekete);
+  border-bottom: 4px solid var(--fekete);
+  padding-top: 3rem; padding-bottom: 3rem;
+}
+.heti::after { /* finom raszter a sárgán */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(20,17,20,.12) 0 1px, transparent 1.6px) 0 0/6px 6px;
+  pointer-events: none;
+}
+.heti__fej { text-align: center; margin-bottom: 1.6rem; position: relative; z-index: 1; }
+.heti__cim {
+  font-family: var(--f-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--kek);
+  font-size: clamp(2.3rem, 10vw, 5.5rem);
+  line-height: .95;
+  letter-spacing: .08em;
+  margin: 0;
+  -webkit-text-stroke: 1px var(--rozsa-sotet);
+  text-shadow: 3px 3px 0 var(--rozsa);
+}
+.heti__het { font-family: var(--f-poszter); font-size: 1.3rem; letter-spacing: .08em; margin: .4rem 0 0; }
+
+.heti__napok {
+  list-style: none; padding: 0;
+  display: grid; gap: .8rem;
+  position: relative; z-index: 1;
+}
+.nap {
+  display: grid;
+  grid-template-columns: 5.2rem 1fr;
+  gap: .6rem;
+  align-items: stretch;
+}
+.nap__datum {
+  background: var(--rozsa);
+  border: 3px solid var(--fekete);
+  border-radius: 14px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  font-family: var(--f-poszter);
+  line-height: 1;
+  padding: .45rem .2rem;
+}
+.nap__datum b { font-size: 2rem; font-weight: 400; }
+.nap__datum span { font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; }
+.nap__esemenyek { display: grid; gap: .45rem; }
+.nap__esemeny {
+  background: #f4e27a;
+  border: 3px solid var(--fekete);
+  border-radius: 14px;
+  padding: .5rem .8rem;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .8rem;
+  text-decoration: none;
+}
+.nap__esemeny:hover { background: var(--papir); }
+.nap__ido { font-family: var(--f-poszter); font-size: 1.4rem; color: var(--rozsa-sotet); }
+.nap__nev { font-family: var(--f-kez); font-size: 1.5rem; line-height: 1.1; color: var(--fekete); }
+.nap--ures .nap__datum { background: transparent; opacity: .45; }
+.nap--ures .nap__esemenyek { font-family: var(--f-kez); font-size: 1.4rem; align-content: center; opacity: .45; }
+.nap--ma .nap__datum { background: var(--kek); color: var(--mustar); }
+.nap--mult { opacity: .4; }
+.nap--mult .nap__nev { text-decoration: line-through; }
+.heti__ures { font-family: var(--f-kez); font-size: 1.6rem; text-align: center; }
+
+@media (max-width: 699px) {
+  .nap--ures { display: none; }
+}
+@media (min-width: 900px) {
+  .heti__napok { grid-template-columns: repeat(7, 1fr); gap: .6rem; }
+  .nap { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .nap__esemeny { flex-direction: column; gap: .1rem; }
+}
+
+/* ---------- 2. PROGRAM / LINE-UP ---------- */
+.program { background: var(--papir); }
+
+.szurok { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 2rem; }
+.szuro {
+  font-family: var(--f-poszter);
+  font-size: 1.1rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fekete);
+  background: var(--papir);
+  border: 3px solid var(--fekete);
+  border-radius: 999px;
+  padding: .35rem 1rem;
+  min-height: 44px;
+  cursor: pointer;
+  box-shadow: 2px 3px 0 var(--fekete);
+  transform: rotate(var(--r, -1deg));
+  transition: transform .15s, background .15s;
+}
+.szuro:nth-child(2n) { --r: 1.5deg; }
+.szuro:nth-child(3n) { --r: -2.5deg; }
+.szuro:hover { transform: rotate(calc(var(--r) * -2)) scale(1.05); }
+.szuro[aria-pressed="true"] { background: var(--kek); color: var(--papir); }
+.szuro[data-kat="koncert"][aria-pressed="true"] { background: var(--rozsa); color: var(--fekete); }
+.szuro[data-kat="kviz"][aria-pressed="true"] { background: var(--mustar); color: var(--fekete); }
+
+.lineup { list-style: none; margin: 0; padding: 0; border-top: 4px solid var(--fekete); }
+.gig {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "datum ido"
+    "cim   cim"
+    "leir  leir"
+    "akc   akc";
+  gap: .2rem 1rem;
+  padding: 1.1rem 0 1.2rem;
+  border-bottom: 2px dashed var(--fekete);
+}
+.gig__datum, .gig__ido { margin: 0; }
+.gig__datum {
+  grid-area: datum;
+  font-family: var(--f-poszter);
+  font-size: clamp(2.4rem, 9vw, 4.4rem);
+  line-height: .9;
+  color: var(--kek);
+}
+.gig__datum small { display: block; font-size: .32em; letter-spacing: .12em; text-transform: uppercase; color: var(--fekete); margin-top: .25rem; }
+.gig__ido {
+  grid-area: ido; align-self: center;
+  font-family: var(--f-poszter);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.gig__ido .kat {
+  display: inline-block; margin-left: .5rem;
+  font-family: var(--f-szoveg); font-weight: 800; font-size: .7rem; letter-spacing: .1em;
+  text-transform: uppercase;
+  border: 2px solid currentColor; padding: .1rem .4rem; vertical-align: middle;
+  transform: rotate(-3deg);
+}
+.gig__cim {
+  grid-area: cim;
+  font-family: var(--f-poszter);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(2rem, 8.5vw, 5.4rem);
+  line-height: .95;
+  margin: .2rem 0 0;
+  overflow-wrap: anywhere;
+  letter-spacing: .005em;
+}
+.gig:nth-child(3n+2) .gig__cim { color: var(--rozsa-sotet); }
+.gig__leiras { grid-area: leir; margin: .4rem 0 0; max-width: 60ch; font-style: italic; }
+.gig__akciok { grid-area: akc; margin-top: .6rem; }
+.naptarba {
+  font-family: var(--f-szoveg); font-weight: 800; font-size: .85rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  background: var(--fekete); color: var(--papir);
+  border: 0; padding: .55rem .9rem; min-height: 40px;
+  cursor: pointer;
+  transform: rotate(-1deg);
+  transition: transform .15s, background .15s;
+}
+.naptarba:hover, .naptarba:focus-visible { background: var(--kek); transform: rotate(1.5deg); }
+
+@media (min-width: 800px) {
+  .gig {
+    grid-template-columns: 10rem 1fr auto;
+    grid-template-areas:
+      "datum cim  akc"
+      "datum ido  akc"
+      "datum leir akc";
+    column-gap: 1.6rem;
+    align-items: start;
+  }
+  .gig__cim { margin: 0; }
+  .gig__ido { align-self: start; }
+  .gig__akciok { margin-top: .4rem; align-self: center; }
+}
+
+/* elmúlt események: halvány, áthúzott */
+.gig--mult { opacity: .38; padding: .7rem 0 .8rem; }
+.gig--mult .gig__cim { text-decoration: line-through; text-decoration-thickness: .08em; font-size: clamp(1.5rem, 5.5vw, 2.8rem); }
+.gig--mult .gig__datum { font-size: clamp(1.8rem, 6vw, 2.8rem); }
+.gig--mult .gig__akciok { display: none; }
+.gig--mult .naptarba { display: none; }
+
+/* a mai / következő kiemelve */
+.gig--kiemelt {
+  background: var(--mustar);
+  margin: 0 calc(var(--gutter) * -1);
+  padding-left: var(--gutter); padding-right: var(--gutter);
+  border-bottom: 4px solid var(--fekete);
+  border-top: 2px solid var(--fekete);
+}
+.gig--kiemelt .gig__cim { color: var(--fekete); }
+.badge {
+  position: absolute;
+  top: .6rem; right: .4rem;
+  z-index: 2;
+  font-family: var(--f-display);
+  font-size: 1.6rem; line-height: 1;
+  background: var(--rozsa);
+  color: var(--fekete);
+  border: 3px solid var(--fekete);
+  border-radius: 50%;
+  width: 4.2rem; height: 4.2rem;
+  display: grid; place-items: center;
+  transform: rotate(12deg);
+  box-shadow: 2px 3px 0 var(--fekete);
+}
+.badge--kov { font-size: .8rem; font-family: var(--f-poszter); letter-spacing: .05em; text-transform: uppercase; background: var(--kek); color: var(--papir); }
+.badge--ma { animation: villog 1.1s steps(2, jump-none) infinite; }
+@keyframes villog { 50% { background: var(--mustar); transform: rotate(-8deg) scale(1.08); } }
+@media (min-width: 800px) { .badge { top: -1rem; right: auto; left: 7.4rem; } }
+
+.lineup__ures { font-family: var(--f-kez); font-size: 1.6rem; padding: 1.5rem 0; }
+.program__jegy { margin-top: 1.5rem; }
+
+/* "rányomódik a lapra" – csak ha van JS és mozgás */
+.anim .gig { transform-origin: 30% 50%; }
+.anim .gig.nyomas { opacity: 0; transform: scale(1.12) rotate(-1.5deg); }
+.anim .gig.nyomva { animation: nyom .45s cubic-bezier(.2,.9,.3,1.3) both; }
+.anim .gig--mult.nyomva { animation-name: nyom-mult; }
+@keyframes nyom {
+  0%   { opacity: 0; transform: scale(1.12) rotate(-1.5deg); }
+  70%  { opacity: 1; transform: scale(.985) rotate(.3deg); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes nyom-mult {
+  0%   { opacity: 0; transform: scale(1.12) rotate(-1.5deg); }
+  100% { opacity: .38; transform: none; }
+}
+
+/* ---------- 3. PINCE ⟷ UDVAR ---------- */
+.terek {
+  transition: background .5s, color .5s;
+}
+.terek[data-ter="pince"] {
+  background: var(--fekete);
+  color: var(--papir);
+  --kiem: var(--rozsa);
+}
+.terek[data-ter="pince"] .misreg { color: var(--papir); text-shadow: -3px 2px 0 var(--rozsa), 3px -2px 0 var(--kek); }
+.terek[data-ter="udvar"] {
+  background: var(--mustar);
+  color: var(--fekete);
+  --kiem: var(--kek);
+}
+.terek[data-ter="pince"]::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(229,95,166,.18) 0 1px, transparent 1.6px) 0 0/7px 7px;
+  pointer-events: none;
+}
+
+.kapcsolo {
+  position: relative;
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 4px solid currentColor;
+  border-radius: 999px;
+  padding: 0;
+  margin: 0 auto 2.4rem;
+  max-width: 520px;
+  min-width: 0;
+  z-index: 1;
+}
+.kapcsolo input { position: absolute; opacity: 0; pointer-events: none; }
+.kapcsolo label {
+  position: relative; z-index: 2;
+  text-align: center;
+  font-family: var(--f-display);
+  font-size: clamp(1.6rem, 7vw, 2.6rem);
+  text-transform: uppercase;
+  padding: .55rem .6rem .45rem;
+  cursor: pointer;
+  transition: color .3s;
+  user-select: none;
+}
+.kapcsolo__gomb {
+  position: absolute; z-index: 1;
+  top: 4px; bottom: 4px; left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: var(--rozsa);
+  border: 3px solid var(--fekete);
+  transition: transform .35s cubic-bezier(.5,1.6,.4,1), background .35s;
+}
+.terek[data-ter="udvar"] .kapcsolo__gomb { transform: translateX(calc(100% - 0px)); background: var(--kek); }
+.kapcsolo input:checked + label { color: var(--fekete); }
+.terek[data-ter="udvar"] .kapcsolo input:checked + label { color: var(--papir); }
+.kapcsolo input:focus-visible + label { outline: 3px dashed currentColor; outline-offset: -8px; border-radius: 999px; }
+
+.ter {
+  position: relative; z-index: 1;
+  display: grid; gap: 2rem;
+  align-items: center;
+}
+.ter[hidden] { display: none; }
+.ter__kep { position: relative; margin: 0; background: var(--papir); padding: 8px; transform: rotate(-2deg); box-shadow: 5px 6px 0 var(--kiem); }
+.ter__kep img { width: 100%; max-height: min(520px, 55vh); object-fit: cover; }
+.ter--udvar .ter__kep { transform: rotate(2deg); }
+.ter__szoveg h3 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(2.4rem, 9vw, 4rem); line-height: 1; margin: 0 0 .6rem;
+  color: var(--kiem);
+}
+.ter__szoveg p { font-size: 1.25rem; font-weight: 600; max-width: 34ch; }
+.tenyek { list-style: none; padding: 0; margin: 1.2rem 0 0; display: grid; gap: .6rem; }
+.tenyek li { border-left: 6px solid var(--kiem); padding-left: .7rem; }
+@media (min-width: 800px) {
+  .ter { grid-template-columns: 1fr 1fr; gap: 3rem; }
+  .ter--pince .ter__kep { max-width: 420px; justify-self: end; }
+}
+
+/* ---------- 5. ÉTEL & ITAL ---------- */
+.etel { background: var(--papir-sotet); }
+.etel__racs { display: grid; gap: 3rem; align-items: center; }
+.polaroidok { position: relative; min-height: 530px; }
+.polaroid {
+  --r: 0deg;
+  position: absolute;
+  margin: 0;
+  background: #fffdf6;
+  padding: 10px 10px 0;
+  width: min(56%, 240px);
+  box-shadow: 2px 4px 10px rgba(0,0,0,.25), 1px 1px 0 rgba(0,0,0,.15);
+  transform: rotate(var(--r));
+  transition: transform .25s;
+}
+.polaroid img, .polaroid__ures { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.polaroid figcaption { font-family: var(--f-kez); font-size: 1.35rem; text-align: center; padding: .4rem 0 .6rem; }
+.polaroid:hover { transform: rotate(0deg) scale(1.05); z-index: 5; }
+.po1 { --r: -6deg; left: 2%;  top: 0; z-index: 2; }
+.po2 { --r: 5deg;  right: 2%; top: 60px; }
+.po3 { --r: -2deg; left: 22%; top: 275px; z-index: 3; }
+.polaroid__ures { display: grid; place-items: center; background: var(--papir-sotet); padding: .5rem; text-align: center; }
+
+.jegyzet { position: relative; }
+.jegyzet .kez { color: var(--kek); }
+.etlap {
+  position: relative;
+  margin-top: 1.4rem;
+  background:
+    linear-gradient(90deg, transparent 2.4rem, rgba(229,95,166,.7) 2.4rem 2.55rem, transparent 2.55rem),
+    repeating-linear-gradient(#fffdf6 0 1.9rem, #b8c6e6 1.9rem 2rem);
+  padding: 1.5rem 1rem 1.2rem 3.2rem;
+  transform: rotate(1.2deg);
+  box-shadow: 3px 4px 0 var(--fekete);
+  border: 2px solid var(--fekete);
+}
+.etlap p { margin: 0 0 .5rem; }
+.etlap__cim { font-family: var(--f-poszter); font-size: 1.5rem; text-transform: uppercase; letter-spacing: .05em; }
+@media (min-width: 800px) {
+  .etel__racs { grid-template-columns: 1.2fr 1fr; }
+  .polaroidok { min-height: 560px; }
+  .po2 { top: 40px; }
+  .po3 { top: 280px; left: 28%; }
+}
+
+/* ---------- 6. GALÉRIA – fanzine ---------- */
+.galeria { background: var(--papir); }
+.zine {
+  list-style: none; padding: 0;
+  display: grid; gap: 2rem 1.2rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+.zine__lap {
+  position: relative;
+  background: #fbf8f0;
+  padding: 8px 8px 2.2rem;
+  border: 1px solid #cfc6b2;
+  box-shadow: 2px 3px 0 rgba(0,0,0,.18);
+  transform: rotate(var(--r, 0deg));
+}
+.z1 { --r: -2deg; grid-row: span 2; }
+.z2 { --r: 1.5deg; }
+.z3 { --r: -1deg; }
+.z4 { --r: 2.5deg; }
+.z5 { --r: -1.5deg; }
+.z6 { --r: 1deg; }
+.zine__gomb {
+  position: relative; display: block; width: 100%; height: 100%;
+  padding: 0; border: 0; background: none; cursor: zoom-in;
+  overflow: hidden;
+}
+.zine__gomb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  aspect-ratio: 1;
+  filter: grayscale(1) contrast(1.6) brightness(1.08);
+  transition: filter .35s;
+}
+.z1 .zine__gomb img { aspect-ratio: auto; min-height: 100%; }
+/* raszterpont-réteg a fénymásolt hatáshoz */
+.zine__gomb::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--raszter) 0 0 / var(--raszter-meret), rgba(230,195,63,.12);
+  mix-blend-mode: multiply;
+  opacity: .9;
+  transition: opacity .35s;
+}
+.zine__gomb:hover img, .zine__gomb:focus-visible img, .zine__gomb.szines img { filter: none; }
+.zine__gomb:hover::after, .zine__gomb:focus-visible::after, .zine__gomb.szines::after { opacity: 0; }
+.zine__felirat {
+  position: absolute; left: 10px; bottom: .4rem;
+  font-family: var(--f-kez); font-size: 1.3rem;
+}
+.zine__ures { display: grid; place-items: center; aspect-ratio: 1; padding: .6rem; text-align: center; background: var(--raszter) 0 0/6px 6px, #eee6d4; }
+.zine__lap--ures { padding-bottom: 8px; }
+@media (min-width: 800px) {
+  .zine { grid-template-columns: repeat(4, 1fr); }
+  .z1 { grid-column: span 1; grid-row: span 2; }
+  .z2 { grid-column: span 2; }
+  .z2 .zine__gomb img { aspect-ratio: 2/1; }
+}
+
+/* lightbox */
+.lightbox {
+  border: 0; padding: 0; background: transparent;
+  max-width: min(92vw, 1100px); max-height: 92vh;
+  overflow: visible;
+}
+.lightbox::backdrop { background: rgba(20,17,20,.88); }
+.lightbox img {
+  max-width: 100%; max-height: 80vh; margin: 0 auto;
+  border: 8px solid var(--papir);
+  box-shadow: 6px 8px 0 var(--rozsa);
+}
+.lightbox__felirat { color: var(--papir); font-family: var(--f-kez); font-size: 1.6rem; text-align: center; margin: .6rem 0 0; }
+.lightbox__zar {
+  position: absolute; top: -14px; right: -6px; z-index: 2;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 3px solid var(--fekete); background: var(--mustar);
+  font-size: 1.3rem; font-weight: 800; cursor: pointer;
+  transform: rotate(8deg);
+}
+
+/* ---------- 7. GYERE LE! ---------- */
+.gyere {
+  background: var(--rozsa);
+  border-top: 4px solid var(--fekete);
+}
+.gyere::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(20,17,20,.12) 0 1px, transparent 1.6px) 0 0/6px 6px;
+  pointer-events: none;
+}
+.gyere > * { position: relative; z-index: 1; }
+.gyere__cim {
+  font-family: var(--f-kez);
+  font-weight: 400;
+  font-size: clamp(4rem, 19vw, 10rem);
+  line-height: .9;
+  margin: 0 auto 2rem;
+  color: var(--fekete);
+  transform: rotate(-3deg);
+  text-shadow: 4px 4px 0 var(--mustar);
+}
+.gyere__racs { display: grid; gap: 3rem; }
+.gyere__adatok { font-style: normal; display: grid; gap: 1.1rem; }
+.gyere__sor { margin: 0; display: grid; gap: .15rem; }
+.gyere__sor a, .gyere__sor > :not(.cimke) {
+  font-family: var(--f-poszter);
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
+  line-height: 1.05;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.gyere__sor .ph { font-family: ui-monospace, "Consolas", monospace; font-size: 1rem; justify-self: start; }
+.gyere__sor a:hover { text-decoration: underline; text-decoration-thickness: 3px; }
+.cimke {
+  font-family: var(--f-szoveg); font-weight: 800; font-size: .8rem;
+  letter-spacing: .14em; text-transform: uppercase;
+  background: var(--fekete); color: var(--rozsa);
+  justify-self: start; padding: .1rem .5rem;
+}
+.gyere__linkek { display: flex; flex-wrap: wrap; gap: .8rem; margin: .6rem 0 0; }
+.matrica-gomb {
+  display: inline-block;
+  font-family: var(--f-poszter); font-size: 1.15rem; letter-spacing: .04em;
+  text-transform: uppercase; text-decoration: none;
+  background: var(--mustar); color: var(--fekete);
+  border: 3px solid var(--fekete); border-radius: 10px;
+  padding: .45rem .9rem; min-height: 44px;
+  box-shadow: 3px 3px 0 var(--fekete);
+  transform: rotate(-2deg);
+  transition: transform .15s;
+}
+.matrica-gomb--kek { background: var(--kek); color: var(--papir); transform: rotate(2deg); }
+.matrica-gomb:hover, .matrica-gomb:focus-visible { transform: rotate(3deg) scale(1.05); }
+
+.terkep {
+  position: relative;
+  background: var(--papir);
+  padding: 8px;
+  border: 3px solid var(--fekete);
+  transform: rotate(1deg);
+  box-shadow: 6px 7px 0 var(--fekete);
+}
+.terkep iframe {
+  display: block;
+  width: 100%; height: 360px; border: 0;
+  /* a palettához színezve */
+  filter: grayscale(1) sepia(.55) saturate(1.6) hue-rotate(-12deg) contrast(1.05);
+}
+.kerek-matrica {
+  position: absolute; z-index: 4;
+  top: -46px; right: -6px;
+  width: 132px; height: 132px; border-radius: 50%;
+  background: var(--mustar);
+  border: 4px solid var(--fekete);
+  box-shadow: 3px 4px 0 var(--fekete);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  font-family: var(--f-poszter); text-transform: uppercase; line-height: 1;
+  color: var(--kek);
+  transform: rotate(-12deg);
+  transition: transform .2s;
+}
+.kerek-matrica:hover { transform: rotate(6deg) scale(1.05); }
+.kerek-matrica__szam { font-size: 2.5rem; color: var(--fekete); }
+.kerek-matrica__kicsi { font-family: var(--f-szoveg); font-weight: 800; font-size: .62rem; letter-spacing: .04em; margin-top: .3rem; color: var(--fekete); }
+@media (min-width: 900px) {
+  .gyere__racs { grid-template-columns: 1fr 1.2fr; align-items: start; }
+  .terkep iframe { height: 440px; }
+}
+
+/* ---------- LÁBLÉC ---------- */
+.lab {
+  background: var(--fekete); color: var(--papir);
+  padding: 2.4rem var(--gutter) 2rem;
+  text-align: center;
+  font-size: .95rem;
+}
+.lab p { margin: .3rem auto; max-width: var(--max); }
+.lab__nev { font-family: var(--f-poszter); font-size: 1.2rem; letter-spacing: .04em; }
+.lab__keszito { color: #8d867c; font-size: .8rem; margin-top: 1.4rem !important; }
+
+/* ---------- mozgás kikapcsolása ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .anim .gig.nyomas { opacity: 1; transform: none; }
+  .anim .gig--mult.nyomas { opacity: .38; }
+}

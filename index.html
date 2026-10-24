@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Barlang – pinceklub és udvar, Szentendre</title>
+  <meta name="description" content="A Barlang a Dunaparti Művelődési Ház udvara és pinceklubja. Szentendre, Duna korzó 18.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Caveat+Brush&family=Rubik+Dirt&display=swap&subset=latin-ext" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#program">Ugrás a programhoz</a>
+
+<!-- ===== MENÜ: ragasztott cetli ===== -->
+<nav class="cetli" aria-label="Fő menü">
+  <button class="cetli__btn" type="button" aria-expanded="false" aria-controls="cetli-lista">
+    <span aria-hidden="true">✶</span> Menü
+  </button>
+  <ul class="cetli__lista" id="cetli-lista">
+    <li><a href="#heti">Heti menetrend</a></li>
+    <li><a href="#program">Program</a></li>
+    <li><a href="#terek">Pince / Udvar</a></li>
+    <li><a href="#etel">Étel &amp; ital</a></li>
+    <li><a href="#galeria">Galéria</a></li>
+    <li><a href="#gyere">Gyere le!</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ===== 1. PLAKÁTFAL ===== -->
+<header class="fal" id="top">
+  <div class="fal__plakatok" aria-hidden="true">
+    <figure class="plakat p1"><img src="kepek/heti-menetrend-1024.png" alt="" width="206" height="206"></figure>
+    <figure class="plakat p2"><img src="kepek/koncert-szinpad.webp" alt="" width="1336" height="2000"></figure>
+    <figure class="plakat p3"><img src="kepek/udvar-este.webp" alt="" width="2000" height="1334"></figure>
+    <figure class="plakat p4"><img src="kepek/pizza-bor-1.png" alt="" width="206" height="206"></figure>
+    <figure class="plakat p5"><img src="kepek/logo.webp" alt="" width="1000" height="1000"></figure>
+    <!-- papírfecnik: a script.js tölti fel a data.js eseményeiből -->
+    <div class="fal__fecnik"></div>
+  </div>
+
+  <div class="fal__cim">
+    <div class="fal__lap">
+      <h1 class="logo-felirat">BARLANG</h1>
+      <p class="fal__alcim">A Dunaparti Művelődési Ház udvara és pinceklubja · Szentendre</p>
+    </div>
+    <a class="matrica matrica--kov" id="kovetkezo" href="#program">
+      <span class="matrica__kicsi">Következő</span>
+      <span class="matrica__nagy">…</span>
+    </a>
+  </div>
+</header>
+
+<!-- ===== 4. HETI MENETREND ===== -->
+<section class="heti" id="heti" aria-labelledby="heti-cim">
+  <div class="heti__fej">
+    <h2 class="heti__cim" id="heti-cim">Heti menetrend</h2>
+    <p class="heti__het" id="heti-het"></p>
+  </div>
+  <ol class="heti__napok" id="heti-napok"></ol>
+</section>
+
+<!-- ===== 2. PROGRAM / LINE-UP ===== -->
+<section class="program" id="program" aria-labelledby="program-cim">
+  <div class="szakasz-fej">
+    <h2 class="cimsor misreg" id="program-cim">Program</h2>
+    <p class="kez" id="program-honap">2026. október</p>
+  </div>
+
+  <div class="szurok" role="group" aria-label="Program szűrése kategória szerint" id="szurok">
+    <!-- a gombokat a script.js rakja ki a BARLANG_KATEGORIAK alapján -->
+  </div>
+
+  <ol class="lineup" id="lineup" aria-live="polite"></ol>
+
+  <p class="program__jegy">Jegyek, belépő: <span class="ph">[IDE JÖN: jegyárak / jegyvásárlás link]</span></p>
+</section>
+
+<!-- ===== 3. PINCE ⟷ UDVAR ===== -->
+<section class="terek" id="terek" data-ter="pince" aria-labelledby="terek-cim">
+  <div class="szakasz-fej">
+    <h2 class="cimsor misreg" id="terek-cim">Pince <span aria-hidden="true">⟷</span><span class="sr"> vagy </span> Udvar</h2>
+  </div>
+
+  <fieldset class="kapcsolo">
+    <legend class="sr">Melyik teret mutassuk?</legend>
+    <input type="radio" name="ter" id="ter-pince" value="pince" checked>
+    <label for="ter-pince">Pince</label>
+    <input type="radio" name="ter" id="ter-udvar" value="udvar">
+    <label for="ter-udvar">Udvar</label>
+    <span class="kapcsolo__gomb" aria-hidden="true"></span>
+  </fieldset>
+
+  <div class="ter ter--pince" id="panel-pince">
+    <figure class="ter__kep plakat-keret">
+      <img src="kepek/koncert-szinpad.webp" alt="Énekes mikrofonnal, piros reflektorfényben a színpadon, mögötte egy zenész a keverőpultnál" loading="lazy" width="1336" height="2000">
+    </figure>
+    <div class="ter__szoveg">
+      <h3>A pince</h3>
+      <p>A pinceklub a koncertek és a bulik tere – jazztől a hardcore-ig.</p>
+      <ul class="tenyek">
+        <li><b>Ár-kategória:</b> $ – megfizethető</li>
+        <li><b>Belépő:</b> <span class="ph">[IDE JÖN: jegyárak]</span></li>
+        <li><b>Befogadóképesség:</b> <span class="ph">[IDE JÖN: hány fő]</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ter ter--udvar" id="panel-udvar" hidden>
+    <figure class="ter__kep plakat-keret">
+      <img src="kepek/udvar-este.webp" alt="Esti udvar színes égősorokkal, beszélgető emberekkel, a háttérben a Művelődési Ház épülete" loading="lazy" width="2000" height="1334">
+    </figure>
+    <div class="ter__szoveg">
+      <h3>Az udvar</h3>
+      <p>A Művelődési Ház udvara: beszélgetés, pizza, bor.</p>
+      <ul class="tenyek">
+        <li><b>Nyitvatartás:</b> <span class="ph">[IDE JÖN: nyitvatartás]</span></li>
+        <li><b>Szezon:</b> <span class="ph">[IDE JÖN: mikor van nyitva az udvar]</span></li>
+        <li><b>Ár-kategória:</b> $ – megfizethető</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 5. ÉTEL & ITAL ===== -->
+<section class="etel" id="etel" aria-labelledby="etel-cim">
+  <div class="szakasz-fej">
+    <h2 class="cimsor misreg" id="etel-cim">Étel &amp; ital</h2>
+  </div>
+
+  <div class="etel__racs">
+    <div class="polaroidok">
+      <figure class="polaroid po1">
+        <img src="kepek/pizza-bor-1.png" alt="Sonkás pizzaszelet papírtányéron, mellette egy üveg vörösbor és egy pohár bor" loading="lazy" width="206" height="206">
+        <figcaption>pizza + bor</figcaption>
+      </figure>
+      <figure class="polaroid po2">
+        <img src="kepek/udvar-este.webp" alt="Az udvar este, asztaloknál ülő vendégekkel" loading="lazy" width="2000" height="1334">
+        <figcaption>az udvaron</figcaption>
+      </figure>
+      <figure class="polaroid po3 polaroid--ures">
+        <div class="polaroid__ures"><span class="ph">[IDE JÖN: fotó]</span></div>
+        <figcaption>ide még egy kép</figcaption>
+      </figure>
+    </div>
+
+    <div class="jegyzet">
+      <p class="kez kez--nagy">Van pizza. Van bor.</p>
+      <p class="kez">…és megfizethető: <b>$</b></p>
+      <div class="etlap">
+        <p class="etlap__cim">Étlap / itallap</p>
+        <p><span class="ph">[IDE JÖN: étel- és itallap]</span></p>
+        <p><span class="ph">[IDE JÖN: árak]</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. GALÉRIA – fénymásolt fanzine ===== -->
+<section class="galeria" id="galeria" aria-labelledby="galeria-cim">
+  <div class="szakasz-fej">
+    <h2 class="cimsor misreg" id="galeria-cim">Galéria</h2>
+    <p class="kez">vidd rá az egeret / koppints rá → színes lesz</p>
+  </div>
+  <ul class="zine">
+    <li class="zine__lap z1"><button type="button" class="zine__gomb" data-felirat="Koncert a színpadon, piros fényben">
+      <img src="kepek/koncert-szinpad.webp" alt="Énekes a színpadon piros reflektorfényben" loading="lazy" width="1336" height="2000"></button>
+      <span class="zine__felirat">#01 színpad</span></li>
+    <li class="zine__lap z2"><button type="button" class="zine__gomb" data-felirat="Az udvar este">
+      <img src="kepek/udvar-este.webp" alt="Az esti udvar égősorokkal és vendégekkel" loading="lazy" width="2000" height="1334"></button>
+      <span class="zine__felirat">#02 udvar</span></li>
+    <li class="zine__lap z3"><button type="button" class="zine__gomb" data-felirat="Heti menetrend plakát">
+      <img src="kepek/heti-menetrend-1024.png" alt="Sárga Heti menetrend plakát a dobos kabalafigurával: 24., 19:00 – Slamtendrectomy, Vaginal Reflux, Head on Collision" loading="lazy" width="206" height="206"></button>
+      <span class="zine__felirat">#03 plakát</span></li>
+    <li class="zine__lap z4"><button type="button" class="zine__gomb" data-felirat="Pizza és bor">
+      <img src="kepek/pizza-bor-1.png" alt="Pizzaszelet papírtányéron és egy üveg vörösbor" loading="lazy" width="206" height="206"></button>
+      <span class="zine__felirat">#04 kaja</span></li>
+    <li class="zine__lap z5"><button type="button" class="zine__gomb" data-felirat="A Barlang logója">
+      <img src="kepek/logo.webp" alt="Fekete BARLANG felirat rózsaszín alapon" loading="lazy" width="1000" height="1000"></button>
+      <span class="zine__felirat">#05 logó</span></li>
+    <li class="zine__lap z6 zine__lap--ures"><div class="zine__ures"><span class="ph">[IDE JÖN: további fotók a koncertekről]</span></div></li>
+  </ul>
+</section>
+
+<!-- ===== 7. GYERE LE! ===== -->
+<section class="gyere" id="gyere" aria-labelledby="gyere-cim">
+  <h2 class="gyere__cim" id="gyere-cim">Gyere le!</h2>
+
+  <div class="gyere__racs">
+    <address class="gyere__adatok">
+      <p class="gyere__sor gyere__sor--cim">
+        <span class="cimke">Cím</span>
+        <a href="https://www.google.com/maps?q=Szentendre+Duna+korz%C3%B3+18" target="_blank" rel="noopener">2000 Szentendre,<br>Duna korzó 18.</a>
+      </p>
+      <p class="gyere__sor">
+        <span class="cimke">Telefon</span>
+        <a href="tel:+3626312657">(26) 312 657</a>
+      </p>
+      <p class="gyere__sor">
+        <span class="cimke">E-mail</span>
+        <a href="mailto:barlang@szentendre.hu">barlang@szentendre.hu</a>
+      </p>
+      <p class="gyere__sor">
+        <span class="cimke">Nyitvatartás</span>
+        <span class="ph">[IDE JÖN: nyitvatartás]</span>
+      </p>
+      <p class="gyere__linkek">
+        <a class="matrica-gomb" href="https://www.facebook.com/Barlangklub/" target="_blank" rel="noopener">Facebook · 9,6 ezer követő</a>
+        <a class="matrica-gomb matrica-gomb--kek" href="https://szentendreprogram.hu" target="_blank" rel="noopener">szentendreprogram.hu</a>
+      </p>
+    </address>
+
+    <div class="terkep">
+      <div class="kerek-matrica" aria-label="A Facebookon 86% ajánlja, 51 vélemény alapján">
+        <span class="kerek-matrica__szam">86%</span>
+        <span>ajánlja</span>
+        <span class="kerek-matrica__kicsi">51 vélemény · Facebook</span>
+      </div>
+      <iframe title="Térkép: Barlang, Szentendre, Duna korzó 18." src="https://www.google.com/maps?q=Szentendre+Duna+korz%C3%B3+18&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="lab">
+  <p class="lab__nev"><b>Barlang</b> · Dunaparti Művelődési Ház · 2000 Szentendre, Duna korzó 18.</p>
+  <p><a href="tel:+3626312657">(26) 312 657</a> · <a href="mailto:barlang@szentendre.hu">barlang@szentendre.hu</a> · <a href="https://www.facebook.com/Barlangklub/" target="_blank" rel="noopener">Facebook</a></p>
+  <p class="lab__keszito">Bemutató terv – készítette: Dér Bálint, +36 30 269 9908</p>
+</footer>
+
+<!-- Lightbox a galériához -->
+<dialog class="lightbox" id="lightbox" aria-label="Nagyított kép">
+  <button class="lightbox__zar" type="button" aria-label="Bezárás">✕</button>
+  <img src="" alt="">
+  <p class="lightbox__felirat"></p>
+</dialog>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
