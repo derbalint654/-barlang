@@ -197,18 +197,39 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
 }
 .plakat img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.1) contrast(1.05); }
 .p1 { --r: -7deg; left: -4%;  top: 9%;    width: 46%; aspect-ratio: 1; animation-delay: -1s; }
-.p2 { --r: 6deg;  right: -6%; top: 6%;    width: 40%; aspect-ratio: 2/3; animation-delay: -3s; }
+.p2 { --r: 6deg;  right: -4%; top: 12%;   width: 40%; aspect-ratio: 2/3; animation-delay: -3s; }
 .p3 { --r: 3deg;  left: -8%;  bottom: 5%; width: 62%; aspect-ratio: 3/2; animation-delay: -2s; }
 .p4 { --r: -5deg; right: 2%;  bottom: 12%;width: 36%; aspect-ratio: 1; animation-delay: -4s; }
 .p5 { --r: 10deg; left: 36%;  top: 2%;    width: 26%; aspect-ratio: 1; animation-delay: -5s; }
 
 @media (min-width: 700px) {
   .p1 { left: 3%;  top: 10%;   width: 24%; }
-  .p2 { right: 3%; top: 6%;    width: 21%; }
+  .p2 { right: 2%; top: 54%;   width: 14%; }
   .p3 { left: 5%;  bottom: 5%; width: 32%; }
   .p4 { right: 20%;bottom: 4%; width: 17%; }
   .p5 { left: 36%; top: 3%;    width: 13%; }
 }
+
+/* CSS-ből "nyomtatott" szöveges plakátok a falon */
+.plakat--szoveg {
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+  background: var(--rozsa);
+  color: var(--fekete);
+  border: 3px solid var(--fekete);
+  padding: .6rem;
+  font-family: var(--f-display);
+  font-size: clamp(1.6rem, 6vw, 3.6rem);
+  line-height: .95;
+  text-transform: uppercase;
+  background-image: radial-gradient(circle, rgba(20,17,20,.18) 0 1px, transparent 1.6px);
+  background-size: 6px 6px;
+}
+.plakat--szoveg .kicsi { font-family: var(--f-kez); font-size: .42em; text-transform: none; margin-top: .4rem; }
+.plakat--sarga { background-color: var(--mustar); color: var(--kek); }
+.plakat--kek { background-color: var(--kek); color: var(--mustar); }
+.p2.plakat--szoveg { aspect-ratio: 3/4; }
+.p3.plakat--szoveg { aspect-ratio: 2/1; }
 
 @keyframes lebeg {
   0%, 100% { transform: rotate(var(--r)) translateY(0); }
@@ -335,7 +356,30 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
   -webkit-text-stroke: 1px var(--rozsa-sotet);
   text-shadow: 3px 3px 0 var(--rozsa);
 }
-.heti__het { font-family: var(--f-poszter); font-size: 1.3rem; letter-spacing: .08em; margin: .4rem 0 0; }
+.heti__het { font-family: var(--f-poszter); font-size: 1.3rem; letter-spacing: .08em; margin: 0; min-width: 9.5em; }
+.heti__het small { display: block; font-family: var(--f-kez); font-size: 1.1rem; letter-spacing: 0; color: var(--rozsa-sotet); }
+
+/* lapozó (hét / hónap) – matricagombok */
+.lapozo { display: flex; align-items: center; justify-content: center; gap: .8rem; margin-top: .6rem; }
+.lapozo__gomb {
+  font-family: var(--f-poszter); font-size: 1.6rem; line-height: 1;
+  min-width: 48px; min-height: 48px;
+  background: var(--rozsa); color: var(--fekete);
+  border: 3px solid var(--fekete); border-radius: 50%;
+  box-shadow: 2px 3px 0 var(--fekete);
+  cursor: pointer;
+  transform: rotate(-4deg);
+  transition: transform .15s;
+}
+.lapozo__gomb:hover, .lapozo__gomb:focus-visible { transform: rotate(6deg) scale(1.08); }
+.lapozo__gomb:disabled { opacity: .3; cursor: default; transform: none; }
+.lapozo__gomb--szoveg { border-radius: 999px; font-size: 1rem; text-transform: uppercase; letter-spacing: .04em; padding: .3rem .8rem; }
+.lapozo--honap { justify-content: flex-start; flex-wrap: wrap; margin: 0 0 1.4rem; }
+@media (max-width: 599px) {
+  .lapozo--honap .lapozo__cim { order: -1; flex-basis: 100%; text-align: left; }
+}
+.lapozo__cim { font-family: var(--f-kez); font-size: 1.8rem; margin: 0; color: var(--kek); min-width: 7.5em; text-align: center; }
+.heti__ures .ph, .lineup__ures .ph { font-size: .6em; vertical-align: middle; }
 
 .heti__napok {
   list-style: none; padding: 0;
@@ -389,6 +433,29 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
 
 /* ---------- 2. PROGRAM / LINE-UP ---------- */
 .program { background: var(--papir); }
+.program__fej { display: grid; gap: 1.5rem 3rem; margin-bottom: 2.4rem; align-items: center; }
+.program__fej .szurok { margin-bottom: 0; }
+.program__plakat {
+  position: relative;
+  margin: 0;
+  background: var(--papir);
+  padding: 8px 8px 0;
+  border: 2px solid var(--fekete);
+  box-shadow: 5px 6px 0 var(--kek);
+  transform: rotate(1.5deg);
+  max-width: 560px;
+}
+.program__plakat img { width: 100%; }
+.program__plakat[hidden] { display: none; }
+.program__plakat--ures {
+  display: grid; place-items: center; text-align: center;
+  aspect-ratio: 834/608; padding: 1rem;
+  background: radial-gradient(circle, rgba(20,17,20,.15) 0 1px, transparent 1.6px) 0 0/6px 6px, var(--mustar);
+}
+.program__plakat figcaption { font-size: 1.2rem; text-align: center; padding: .3rem 0 .5rem; }
+@media (min-width: 900px) {
+  .program__fej { grid-template-columns: 1fr minmax(0, 520px); }
+}
 
 .szurok { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 2rem; }
 .szuro {
@@ -627,7 +694,7 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
 /* ---------- 5. ÉTEL & ITAL ---------- */
 .etel { background: var(--papir-sotet); }
 .etel__racs { display: grid; gap: 3rem; align-items: center; }
-.polaroidok { position: relative; min-height: 530px; }
+.polaroidok { position: relative; min-height: 560px; }
 .polaroid {
   --r: 0deg;
   position: absolute;
@@ -644,7 +711,7 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
 .polaroid:hover { transform: rotate(0deg) scale(1.05); z-index: 5; }
 .po1 { --r: -6deg; left: 2%;  top: 0; z-index: 2; }
 .po2 { --r: 5deg;  right: 2%; top: 60px; }
-.po3 { --r: -2deg; left: 22%; top: 275px; z-index: 3; }
+.po3 { --r: -2deg; left: 22%; top: 305px; z-index: 3; }
 .polaroid__ures { display: grid; place-items: center; background: var(--papir-sotet); padding: .5rem; text-align: center; }
 
 .jegyzet { position: relative; }
@@ -662,6 +729,11 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
 }
 .etlap p { margin: 0 0 .5rem; }
 .etlap__cim { font-family: var(--f-poszter); font-size: 1.5rem; text-transform: uppercase; letter-spacing: .05em; }
+.etlap__alcim { font-family: var(--f-kez); font-size: 1.5rem; line-height: 2rem; color: var(--rozsa-sotet); margin: .4rem 0 0 !important; }
+.etlap__lista { list-style: none; margin: 0 0 .4rem; padding: 0; font-family: var(--f-kez); font-size: 1.3rem; line-height: 2rem; }
+.etlap__lista li { display: flex; justify-content: space-between; gap: .8rem; }
+.etlap__lista li span:last-child { color: var(--kek); white-space: nowrap; }
+.etlap__megj { font-size: .9rem; font-weight: 600; font-style: italic; line-height: 1.35; background: #fff6a8; padding: .3rem .5rem; margin-top: .6rem !important; }
 @media (min-width: 800px) {
   .etel__racs { grid-template-columns: 1.2fr 1fr; }
   .polaroidok { min-height: 560px; }
@@ -684,12 +756,10 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
   box-shadow: 2px 3px 0 rgba(0,0,0,.18);
   transform: rotate(var(--r, 0deg));
 }
-.z1 { --r: -2deg; grid-row: span 2; }
+.z1 { --r: -1.5deg; grid-column: span 2; }
 .z2 { --r: 1.5deg; }
 .z3 { --r: -1deg; }
-.z4 { --r: 2.5deg; }
-.z5 { --r: -1.5deg; }
-.z6 { --r: 1deg; }
+.z4 { --r: 2deg; grid-column: span 2; }
 .zine__gomb {
   position: relative; display: block; width: 100%; height: 100%;
   padding: 0; border: 0; background: none; cursor: zoom-in;
@@ -702,7 +772,6 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
   filter: grayscale(1) contrast(1.6) brightness(1.08);
   transition: filter .35s;
 }
-.z1 .zine__gomb img { aspect-ratio: auto; min-height: 100%; }
 /* raszterpont-réteg a fénymásolt hatáshoz */
 .zine__gomb::after {
   content: "";
@@ -720,11 +789,12 @@ section > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
 }
 .zine__ures { display: grid; place-items: center; aspect-ratio: 1; padding: .6rem; text-align: center; background: var(--raszter) 0 0/6px 6px, #eee6d4; }
 .zine__lap--ures { padding-bottom: 8px; }
+.z4 .zine__ures { aspect-ratio: 2/1; }
 @media (min-width: 800px) {
   .zine { grid-template-columns: repeat(4, 1fr); }
-  .z1 { grid-column: span 1; grid-row: span 2; }
-  .z2 { grid-column: span 2; }
-  .z2 .zine__gomb img { aspect-ratio: 2/1; }
+  .z1 { grid-column: span 2; grid-row: span 2; }
+  .z4 { grid-column: span 2; }
+  .z4 .zine__ures { aspect-ratio: 2/1; }
 }
 
 /* lightbox */

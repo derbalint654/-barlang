@@ -24,7 +24,7 @@
    ===================================================================== */
 
 window.BARLANG_PROGRAM = [
-  /* ---------- 2026. október (a havi borítóképről) ---------- */
+  /* ---------- 2026. október (a havi borítóképről: kepek/borito-oktober.webp) ---------- */
   { datum: "2026-10-03", ido: "20:00", cim: "Bëlga",                         kategoria: "koncert" },
   { datum: "2026-10-08", ido: "18:00", cim: "Stepout Games Quiz",            kategoria: "kviz" },
   { datum: "2026-10-09", ido: "20:00", cim: "Kiss Erzsi Panchan",            kategoria: "koncert" },
@@ -40,7 +40,16 @@ window.BARLANG_PROGRAM = [
     leiras: "„A szentendrei nehézzenei felállás, a tatabányai gore brigád és a debreceni hardcore csapat egy este, a Barlangban.”"
   },
   { datum: "2026-10-30", ido: "20:00", cim: "Sokkal Másabb",                 kategoria: "koncert" },
-  { datum: "2026-10-31", ido: "20:00", cim: "Halloween Party DJ Spacecowboyjal", kategoria: "buli" }
+  { datum: "2026-10-31", ido: "20:00", cim: "Halloween Party DJ Spacecowboyjal", kategoria: "buli" },
+
+  /* ---------- 2026. november ----------
+     IDE KELL MAJD BEÍRNI a novemberi eseményeket (a havi borítókép alapján).
+     Amíg ez üres, az oldal a novemberi hónapnál egy jól látható
+     "[IDE JÖN: ...]" helyőrzőt mutat. Minta (vedd ki elől a //-t):
+
+  // { datum: "2026-11-06", ido: "20:00", cim: "Fellépő neve", kategoria: "koncert" },
+  // { datum: "2026-11-12", ido: "19:00", cim: "Kvízest",      kategoria: "kviz" },
+  */
 ];
 
 /* A szűrőgombok feliratai. Új kategóriát itt lehet felvenni. */

@@ -35,10 +35,11 @@
 <!-- ===== 1. PLAKÁTFAL ===== -->
 <header class="fal" id="top">
   <div class="fal__plakatok" aria-hidden="true">
+    <!-- minden kép csak egyszer szerepel az oldalon; a falon a többi "plakát" CSS-ből van -->
     <figure class="plakat p1"><img src="kepek/heti-menetrend-1024.png" alt="" width="206" height="206"></figure>
-    <figure class="plakat p2"><img src="kepek/koncert-szinpad.webp" alt="" width="1336" height="2000"></figure>
-    <figure class="plakat p3"><img src="kepek/udvar-este.webp" alt="" width="2000" height="1334"></figure>
-    <figure class="plakat p4"><img src="kepek/pizza-bor-1.png" alt="" width="206" height="206"></figure>
+    <div class="plakat plakat--szoveg p2"><span>Pince</span><span class="kicsi">jazztől a hardcore-ig</span></div>
+    <div class="plakat plakat--szoveg plakat--sarga p3"><span>Duna korzó 18.</span><span class="kicsi">Szentendre</span></div>
+    <div class="plakat plakat--szoveg plakat--kek p4"><span>Udvar</span><span class="kicsi">pizza · bor</span></div>
     <figure class="plakat p5"><img src="kepek/logo.webp" alt="" width="1000" height="1000"></figure>
     <!-- papírfecnik: a script.js tölti fel a data.js eseményeiből -->
     <div class="fal__fecnik"></div>
@@ -60,20 +61,43 @@
 <section class="heti" id="heti" aria-labelledby="heti-cim">
   <div class="heti__fej">
     <h2 class="heti__cim" id="heti-cim">Heti menetrend</h2>
-    <p class="heti__het" id="heti-het"></p>
+    <div class="lapozo" aria-live="polite">
+      <button type="button" class="lapozo__gomb" id="heti-elozo" aria-label="Előző hét">‹</button>
+      <p class="heti__het"><span id="heti-het"></span> <small id="heti-cimke"></small></p>
+      <button type="button" class="lapozo__gomb" id="heti-kov" aria-label="Következő hét">›</button>
+    </div>
   </div>
   <ol class="heti__napok" id="heti-napok"></ol>
 </section>
 
 <!-- ===== 2. PROGRAM / LINE-UP ===== -->
 <section class="program" id="program" aria-labelledby="program-cim">
-  <div class="szakasz-fej">
-    <h2 class="cimsor misreg" id="program-cim">Program</h2>
-    <p class="kez" id="program-honap">2026. október</p>
-  </div>
+  <div class="program__fej">
+    <div>
+      <div class="szakasz-fej">
+        <h2 class="cimsor misreg" id="program-cim">Program</h2>
+      </div>
 
-  <div class="szurok" role="group" aria-label="Program szűrése kategória szerint" id="szurok">
-    <!-- a gombokat a script.js rakja ki a BARLANG_KATEGORIAK alapján -->
+      <div class="lapozo lapozo--honap" aria-live="polite">
+        <button type="button" class="lapozo__gomb lapozo__gomb--szoveg" id="honap-elozo" aria-label="Előző hónap">‹ <span></span></button>
+        <p class="lapozo__cim" id="program-honap">2026. október</p>
+        <button type="button" class="lapozo__gomb lapozo__gomb--szoveg" id="honap-kov" aria-label="Következő hónap"><span></span> ›</button>
+      </div>
+
+      <div class="szurok" role="group" aria-label="Program szűrése kategória szerint" id="szurok">
+        <!-- a gombokat a script.js rakja ki a BARLANG_KATEGORIAK alapján -->
+      </div>
+    </div>
+
+    <!-- a havi borítókép: havonta ezt a képet is érdemes lecserélni -->
+    <!-- data-honap: melyik hónaphoz tartozik a plakát (másik hónapnál helyőrző látszik) -->
+    <figure class="program__plakat plakat-keret" id="havi-plakat" data-honap="2026-10">
+      <img src="kepek/borito-oktober.webp" alt="A Barlang 2026. októberi programplakátja sárga alapon, a dobos kabalafigurával" loading="lazy" width="834" height="608">
+      <figcaption class="kez">a havi plakát – lent minden esemény külön</figcaption>
+    </figure>
+    <div class="program__plakat program__plakat--ures" id="havi-plakat-ures" hidden>
+      <span class="ph" id="havi-plakat-ph">[IDE JÖN: a havi plakát]</span>
+    </div>
   </div>
 
   <ol class="lineup" id="lineup" aria-live="polite"></ol>
@@ -140,8 +164,8 @@
         <figcaption>pizza + bor</figcaption>
       </figure>
       <figure class="polaroid po2">
-        <img src="kepek/udvar-este.webp" alt="Az udvar este, asztaloknál ülő vendégekkel" loading="lazy" width="2000" height="1334">
-        <figcaption>az udvaron</figcaption>
+        <img src="kepek/pizza-sajt.png" alt="Vendég pizzaszelettel, nyúlik a sajt, a kezében piros üdítő jéggel" loading="lazy" width="206" height="206">
+        <figcaption>nyúlik a sajt</figcaption>
       </figure>
       <figure class="polaroid po3 polaroid--ures">
         <div class="polaroid__ures"><span class="ph">[IDE JÖN: fotó]</span></div>
@@ -154,8 +178,22 @@
       <p class="kez">…és megfizethető: <b>$</b></p>
       <div class="etlap">
         <p class="etlap__cim">Étlap / itallap</p>
-        <p><span class="ph">[IDE JÖN: étel- és itallap]</span></p>
-        <p><span class="ph">[IDE JÖN: árak]</span></p>
+        <!-- MINTA! Kitalált tételek és árak – a valódi étlapra kell cserélni -->
+        <p class="etlap__alcim">Pizza</p>
+        <ul class="etlap__lista">
+          <li><span>Margherita</span><span>1 900 Ft</span></li>
+          <li><span>Sonkás</span><span>2 300 Ft</span></li>
+          <li><span>Szalámis-csípős</span><span>2 400 Ft</span></li>
+          <li><span>Négysajtos</span><span>2 500 Ft</span></li>
+        </ul>
+        <p class="etlap__alcim">Inni</p>
+        <ul class="etlap__lista">
+          <li><span>Vörösbor / fehérbor (1 dl)</span><span>500 Ft</span></li>
+          <li><span>Fröccs (kisfröccs)</span><span>450 Ft</span></li>
+          <li><span>Csapolt sör (0,5 l)</span><span>990 Ft</span></li>
+          <li><span>Házi limonádé</span><span>800 Ft</span></li>
+        </ul>
+        <p class="etlap__megj">(Ez csak kitaláció – majd átírjuk a rendes étlapra és árakra.)</p>
       </div>
     </div>
   </div>
@@ -168,22 +206,16 @@
     <p class="kez">vidd rá az egeret / koppints rá → színes lesz</p>
   </div>
   <ul class="zine">
-    <li class="zine__lap z1"><button type="button" class="zine__gomb" data-felirat="Koncert a színpadon, piros fényben">
-      <img src="kepek/koncert-szinpad.webp" alt="Énekes a színpadon piros reflektorfényben" loading="lazy" width="1336" height="2000"></button>
+    <li class="zine__lap z1"><button type="button" class="zine__gomb" data-felirat="Koncert: ének és billentyűk, kék fényben">
+      <img src="kepek/koncert-billentyu.png" alt="Énekesnő mikrofonnal a színpadon kék fényben, előtte egy zenész szintetizátoron játszik" loading="lazy" width="206" height="206"></button>
       <span class="zine__felirat">#01 színpad</span></li>
-    <li class="zine__lap z2"><button type="button" class="zine__gomb" data-felirat="Az udvar este">
-      <img src="kepek/udvar-este.webp" alt="Az esti udvar égősorokkal és vendégekkel" loading="lazy" width="2000" height="1334"></button>
+    <li class="zine__lap z2"><button type="button" class="zine__gomb" data-felirat="Tömeg az udvaron, a színes lámpák alatt">
+      <img src="kepek/udvar-lampak.png" alt="Este az udvaron: tömeg a felakasztott színes lámpabúrák alatt, háttérben a színpad" loading="lazy" width="206" height="206"></button>
       <span class="zine__felirat">#02 udvar</span></li>
-    <li class="zine__lap z3"><button type="button" class="zine__gomb" data-felirat="Heti menetrend plakát">
-      <img src="kepek/heti-menetrend-1024.png" alt="Sárga Heti menetrend plakát a dobos kabalafigurával: 24., 19:00 – Slamtendrectomy, Vaginal Reflux, Head on Collision" loading="lazy" width="206" height="206"></button>
-      <span class="zine__felirat">#03 plakát</span></li>
-    <li class="zine__lap z4"><button type="button" class="zine__gomb" data-felirat="Pizza és bor">
-      <img src="kepek/pizza-bor-1.png" alt="Pizzaszelet papírtányéron és egy üveg vörösbor" loading="lazy" width="206" height="206"></button>
-      <span class="zine__felirat">#04 kaja</span></li>
-    <li class="zine__lap z5"><button type="button" class="zine__gomb" data-felirat="A Barlang logója">
-      <img src="kepek/logo.webp" alt="Fekete BARLANG felirat rózsaszín alapon" loading="lazy" width="1000" height="1000"></button>
-      <span class="zine__felirat">#05 logó</span></li>
-    <li class="zine__lap z6 zine__lap--ures"><div class="zine__ures"><span class="ph">[IDE JÖN: további fotók a koncertekről]</span></div></li>
+    <li class="zine__lap z3"><button type="button" class="zine__gomb" data-felirat="A Barlang cégtáblája">
+      <img src="kepek/cegtabla.png" alt="Fa cégtábla BARLANG felirattal, este, mellette egy utcai lámpa" loading="lazy" width="206" height="206"></button>
+      <span class="zine__felirat">#03 bejárat</span></li>
+    <li class="zine__lap z4 zine__lap--ures"><div class="zine__ures"><span class="ph">[IDE JÖN: további fotók a koncertekről]</span></div></li>
   </ul>
 </section>
 

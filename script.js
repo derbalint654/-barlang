@@ -2,6 +2,10 @@
    BARLANG – oldal logika (vanilla JS, szerver nélkül)
    Az adatok a data.js-ben vannak, ide nem kell nyúlni havonta.
    Teszteléshez a mai nap felülírható: index.html?ma=2026-10-15
+
+   Frissülés: az oldal magától újraszámolja a "ma / következő / elmúlt"
+   állapotokat éjfélkor, és amikor a látogató visszatér a fülre –
+   nem kell újratölteni.
    ===================================================================== */
 (function () {
   "use strict";
@@ -17,9 +21,9 @@
   if (mozgas) document.documentElement.classList.add("anim");
 
   /* ---------- dátum segédek ---------- */
+  var tesztNap = new URLSearchParams(location.search).get("ma");
   function maiNap() {
-    var p = new URLSearchParams(location.search).get("ma");
-    if (p && /^\d{4}-\d{2}-\d{2}$/.test(p)) return napbol(p);
+    if (tesztNap && /^\d{4}-\d{2}-\d{2}$/.test(tesztNap)) return napbol(tesztNap);
     var d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
@@ -30,6 +34,21 @@
   function kulcs(d) {
     return d.getFullYear() + "-" + ket(d.getMonth() + 1) + "-" + ket(d.getDate());
   }
+  function honapKulcs(d) { return d.getFullYear() + "-" + ket(d.getMonth() + 1); }
+  function honapNev(hk) {
+    var r = hk.split("-").map(Number);
+    return r[0] + ". " + HONAPOK[r[1] - 1];
+  }
+  function honapLep(hk, n) {
+    var r = hk.split("-").map(Number);
+    return honapKulcs(new Date(r[0], r[1] - 1 + n, 1));
+  }
+  function hetfoje(d) {
+    var h = new Date(d);
+    h.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return h;
+  }
+  function napLep(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
   function ket(n) { return (n < 10 ? "0" : "") + n; }
   function pontos(d) { return ket(d.getMonth() + 1) + "." + ket(d.getDate()) + "."; }
   function el(tag, cls, szoveg) {
@@ -38,21 +57,41 @@
     if (szoveg != null) e.textContent = szoveg;
     return e;
   }
+  function helyorzo(szoveg) { return el("span", "ph", "[IDE JÖN: " + szoveg + "]"); }
 
-  var MA = maiNap();
-  var MA_K = kulcs(MA);
-
-  PROGRAM.forEach(function (e) {
-    e._nap = napbol(e.datum);
-    e._allapot = e.datum < MA_K ? "mult" : (e.datum === MA_K ? "ma" : "jovo");
-  });
+  PROGRAM.forEach(function (e) { e._nap = napbol(e.datum); });
   PROGRAM.sort(function (a, b) {
     return (a.datum + a.ido).localeCompare(b.datum + b.ido);
   });
-  var KOVETKEZO = PROGRAM.filter(function (e) { return e._allapot !== "mult"; })[0] || null;
+
+  /* ---------- állapot: mai nap, következő esemény, kiválasztott hét/hónap ---------- */
+  var MA, MA_K, KOVETKEZO;
+  var nezettHet = null;     // a Heti menetrendben mutatott hét hétfője
+  var nezettHonap = null;   // a programlistában mutatott hónap ("2026-11")
+  var aktivSzuro = "mind";
+
+  function allapotSzamol() {
+    MA = maiNap();
+    MA_K = kulcs(MA);
+    PROGRAM.forEach(function (e) {
+      e._allapot = e.datum < MA_K ? "mult" : (e.datum === MA_K ? "ma" : "jovo");
+    });
+    KOVETKEZO = PROGRAM.filter(function (e) { return e._allapot !== "mult"; })[0] || null;
+  }
+
+  /* Mely hónapok között lehet lapozni: az első feltöltött hónaptól
+     a legutolsó (vagy a mostani) utáni hónapig – az még üres, oda
+     kell majd beírni az új programot. */
+  function honapTartomany() {
+    var elso = PROGRAM.length ? honapKulcs(PROGRAM[0]._nap) : honapKulcs(MA);
+    var utolso = PROGRAM.length ? honapKulcs(PROGRAM[PROGRAM.length - 1]._nap) : honapKulcs(MA);
+    if (honapKulcs(MA) > utolso) utolso = honapKulcs(MA);
+    if (honapKulcs(MA) < elso) elso = honapKulcs(MA);
+    return { elso: elso, utolso: honapLep(utolso, 1) };
+  }
 
   /* ---------- 1. nyitókép: következő esemény matrica ---------- */
-  (function matrica() {
+  function rajzolMatrica() {
     var m = document.getElementById("kovetkezo");
     if (!m) return;
     var kicsi = m.querySelector(".matrica__kicsi");
@@ -62,7 +101,7 @@
       nagy.textContent = "Hamarosan jön a következő havi program";
       return;
     }
-    var holnap = new Date(MA); holnap.setDate(holnap.getDate() + 1);
+    var holnap = napLep(MA, 1);
     if (KOVETKEZO._allapot === "ma") {
       kicsi.textContent = parseInt(KOVETKEZO.ido, 10) >= 17 ? "Ma este " + KOVETKEZO.ido : "Ma " + KOVETKEZO.ido;
     } else if (KOVETKEZO.datum === kulcs(holnap)) {
@@ -71,12 +110,13 @@
       kicsi.textContent = "Következő: " + pontos(KOVETKEZO._nap) + " " + KOVETKEZO.ido;
     }
     nagy.textContent = KOVETKEZO.cim;
-  })();
+  }
 
   /* papírfecnik a plakátfalra a közelgő eseményekből */
-  (function fecnik() {
+  function rajzolFecnik() {
     var hely = document.querySelector(".fal__fecnik");
     if (!hely) return;
+    hely.innerHTML = "";
     var jovo = PROGRAM.filter(function (e) { return e._allapot !== "mult"; });
     var lista = jovo.length >= 3 ? jovo.slice(0, 3) : PROGRAM.slice(-3);
     lista.forEach(function (e, i) {
@@ -85,21 +125,37 @@
       f.appendChild(el("b", null, e.cim.length > 18 ? e.cim.split(",")[0] : e.cim));
       hely.appendChild(f);
     });
-  })();
+  }
 
-  /* ---------- 4. Heti menetrend ---------- */
-  (function heti() {
+  /* ---------- 4. Heti menetrend (lapozható) ---------- */
+  function alapHet() {
+    // ha erre a hétre már nincs hátra esemény (pl. vasárnap), a jövő hetet mutatjuk
+    var het = hetfoje(MA);
+    var vasarnap = kulcs(napLep(het, 6));
+    var hatraVan = PROGRAM.some(function (e) { return e.datum >= MA_K && e.datum <= vasarnap; });
+    return hatraVan ? het : napLep(het, 7);
+  }
+
+  function rajzolHeti() {
     var lista = document.getElementById("heti-napok");
     var fej = document.getElementById("heti-het");
+    var cimke = document.getElementById("heti-cimke");
     if (!lista) return;
-    var hetfo = new Date(MA);
-    hetfo.setDate(MA.getDate() - ((MA.getDay() + 6) % 7));
-    var vasarnap = new Date(hetfo); vasarnap.setDate(hetfo.getDate() + 6);
+    lista.innerHTML = "";
+    var regiUres = document.querySelector(".heti__ures");
+    if (regiUres) regiUres.remove();
+
+    var hetfo = nezettHet;
+    var vasarnap = napLep(hetfo, 6);
     fej.textContent = pontos(hetfo) + " – " + pontos(vasarnap);
+
+    var eltolas = Math.round((hetfo - hetfoje(MA)) / (7 * 864e5));
+    cimke.textContent = eltolas === 0 ? "ez a hét" : eltolas === 1 ? "jövő hét"
+      : eltolas === -1 ? "múlt hét" : (eltolas > 0 ? eltolas + " hét múlva" : -eltolas + " hete");
 
     var vanEsemeny = false;
     for (var i = 0; i < 7; i++) {
-      var nap = new Date(hetfo); nap.setDate(hetfo.getDate() + i);
+      var nap = napLep(hetfo, i);
       var k = kulcs(nap);
       var esemenyek = PROGRAM.filter(function (e) { return e.datum === k; });
       if (esemenyek.length) vanEsemeny = true;
@@ -123,6 +179,7 @@
       esemenyek.forEach(function (e) {
         var a = el("a", "nap__esemeny");
         a.href = "#gig-" + e.datum + "-" + e.ido.replace(":", "");
+        a.dataset.honap = honapKulcs(e._nap);
         a.appendChild(el("span", "nap__ido", e.ido));
         a.appendChild(el("span", "nap__nev", e.cim));
         doboz.appendChild(a);
@@ -131,32 +188,67 @@
       lista.appendChild(li);
     }
     if (!vanEsemeny) {
-      var u = el("p", "heti__ures", "Erre a hétre még nincs program feltöltve – kövesd a Facebookot!");
+      var u = el("p", "heti__ures");
+      u.appendChild(document.createTextNode("Erre a hétre még nincs program beírva. "));
+      u.appendChild(helyorzo("a hét eseményei – a data.js fájlba kell beírni"));
       lista.parentNode.appendChild(u);
     }
-  })();
+  }
 
-  /* ---------- 2. Program / line-up ---------- */
-  var lineup = document.getElementById("lineup");
-  var aktivSzuro = "mind";
-
-  (function honapCim() {
-    var h = document.getElementById("program-honap");
-    if (!h || !PROGRAM.length) return;
-    var honapok = {};
-    PROGRAM.forEach(function (e) {
-      honapok[e._nap.getFullYear() + ". " + HONAPOK[e._nap.getMonth()]] = 1;
+  (function hetiLapozo() {
+    var elozo = document.getElementById("heti-elozo");
+    var kov = document.getElementById("heti-kov");
+    if (!elozo) return;
+    elozo.addEventListener("click", function () { nezettHet = napLep(nezettHet, -7); rajzolHeti(); });
+    kov.addEventListener("click", function () { nezettHet = napLep(nezettHet, 7); rajzolHeti(); });
+    // a heti sávból egy másik hónap eseményére kattintva a lista is oda lapoz
+    document.getElementById("heti-napok").addEventListener("click", function (ev) {
+      var a = ev.target.closest(".nap__esemeny");
+      if (a && a.dataset.honap !== nezettHonap) { nezettHonap = a.dataset.honap; rajzolLineup(); }
     });
-    h.textContent = Object.keys(honapok).join(" · ");
   })();
+
+  /* ---------- 2. Program / line-up (hónaponként lapozható) ---------- */
+  var lineup = document.getElementById("lineup");
+
+  function rajzolHonapLapozo() {
+    var t = honapTartomany();
+    document.getElementById("program-honap").textContent = honapNev(nezettHonap);
+    var elozo = document.getElementById("honap-elozo");
+    var kov = document.getElementById("honap-kov");
+    elozo.disabled = nezettHonap <= t.elso;
+    kov.disabled = nezettHonap >= t.utolso;
+    elozo.querySelector("span").textContent = honapNev(honapLep(nezettHonap, -1)).split(" ")[1];
+    kov.querySelector("span").textContent = honapNev(honapLep(nezettHonap, 1)).split(" ")[1];
+
+    // a havi plakát csak a saját hónapjánál látszik, máshol helyőrző
+    var plakat = document.getElementById("havi-plakat");
+    var ures = document.getElementById("havi-plakat-ures");
+    if (plakat && ures) {
+      var sajat = plakat.dataset.honap === nezettHonap;
+      plakat.hidden = !sajat;
+      ures.hidden = sajat;
+      document.getElementById("havi-plakat-ph").textContent =
+        "[IDE JÖN: " + HONAPOK[Number(nezettHonap.split("-")[1]) - 1] + "i plakát – kepek mappába]";
+    }
+  }
 
   function rajzolLineup() {
+    rajzolHonapLapozo();
     lineup.innerHTML = "";
-    var latszik = PROGRAM.filter(function (e) {
+    var honapEsemenyei = PROGRAM.filter(function (e) { return honapKulcs(e._nap) === nezettHonap; });
+    if (!honapEsemenyei.length) {
+      var ures = el("li", "lineup__ures");
+      ures.appendChild(document.createTextNode("A " + honapNev(nezettHonap) + "i program még nincs fent. "));
+      ures.appendChild(helyorzo(HONAPOK[Number(nezettHonap.split("-")[1]) - 1] + "i program – a data.js fájlba kell beírni"));
+      lineup.appendChild(ures);
+      return;
+    }
+    var latszik = honapEsemenyei.filter(function (e) {
       return aktivSzuro === "mind" || e.kategoria === aktivSzuro;
     });
     if (!latszik.length) {
-      lineup.appendChild(el("li", "lineup__ures", "Ebben a kategóriában most nincs esemény."));
+      lineup.appendChild(el("li", "lineup__ures", "Ebben a kategóriában ebben a hónapban nincs esemény."));
       return;
     }
     latszik.forEach(function (e) {
@@ -200,6 +292,15 @@
     nyomas();
   }
 
+  (function honapLapozo() {
+    document.getElementById("honap-elozo").addEventListener("click", function () {
+      nezettHonap = honapLep(nezettHonap, -1); rajzolLineup();
+    });
+    document.getElementById("honap-kov").addEventListener("click", function () {
+      nezettHonap = honapLep(nezettHonap, 1); rajzolLineup();
+    });
+  })();
+
   (function szurok() {
     var hely = document.getElementById("szurok");
     if (!hely) return;
@@ -241,13 +342,39 @@
     });
   }
 
-  rajzolLineup();
+  /* ---------- minden kirajzolása + automatikus frissülés ---------- */
+  function mindentRajzol(lapozoVissza) {
+    allapotSzamol();
+    if (lapozoVissza || !nezettHet) nezettHet = alapHet();
+    if (lapozoVissza || !nezettHonap) {
+      nezettHonap = KOVETKEZO ? honapKulcs(KOVETKEZO._nap) : honapKulcs(MA);
+    }
+    rajzolMatrica();
+    rajzolFecnik();
+    rajzolHeti();
+    rajzolLineup();
+  }
+  mindentRajzol(true);
+
+  // ha közben megváltozik a nap (éjfél, vagy napokig nyitva hagyott fül),
+  // minden magától frissül, és visszaugrik az aktuális hétre/hónapra
+  var utolsoNap = MA_K;
+  function napValtasEllenor() {
+    if (kulcs(maiNap()) !== utolsoNap) {
+      mindentRajzol(true);
+      utolsoNap = MA_K;
+    }
+  }
+  setInterval(napValtasEllenor, 60 * 1000);
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) napValtasEllenor();
+  });
 
   /* ---------- .ics generálás és letöltés ---------- */
   function icsSzoveg(s) {
     return String(s).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
   }
-  function hajtas(sor) { // RFC 5545: max. 75 karakteres sorok
+  function hajtas(sor) { // RFC 5545: max. 75 bájtos sorok
     var ki = [];
     while (sor.length > 60) { ki.push(sor.slice(0, 60)); sor = " " + sor.slice(60); } // ékezetek miatt bőven 75 bájt alatt
     ki.push(sor);
@@ -297,7 +424,6 @@
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
   }
-  window.__barlangICS = letoltICS; // teszteléshez
 
   /* ---------- 3. Pince ⟷ Udvar váltó ---------- */
   (function terek() {
